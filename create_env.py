@@ -1,5 +1,18 @@
-# Django Settings
-SECRET_KEY=-jfzjmyvaBIiUXfAogO7jQD2ZiJ8E3eBMyFd-xjBIVB9ClueIIQaxkE5esmwPhdyPRw
+#!/usr/bin/env python3
+"""
+Script to create .env file with environment variables
+"""
+import os
+import secrets
+
+def generate_secret_key():
+    """Generate a Django secret key"""
+    return secrets.token_urlsafe(50)
+
+def create_env_file():
+    """Create .env file with environment variables"""
+    env_content = f"""# Django Settings
+SECRET_KEY={generate_secret_key()}
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
 
@@ -30,3 +43,13 @@ TELEGRAM_UPGRADE_URL=https://localhost:8000/subscribe/
 
 # Media Configuration
 MEDIA_ROOT=/tmp/media
+"""
+    
+    with open('.env', 'w') as f:
+        f.write(env_content)
+    
+    print("✅ .env file created successfully!")
+    print("⚠️  Remember to update the placeholder values with your actual credentials")
+
+if __name__ == "__main__":
+    create_env_file() 
