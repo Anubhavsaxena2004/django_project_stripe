@@ -1,0 +1,17 @@
+Django>=4.2
+djangorestframework>=3.14
+djangorestframework-simplejwt>=5.2
+django-environ>=0.10
+django-tailwind>=3.5
+yfinance>=0.2
+pandas>=2.0
+numpy>=1.26,<2.0
+matplotlib>=3.7
+scikit-learn>=1.2
+tensorflow>=2.12
+stripe>=7.0
+python-telegram-bot==22.1
+whitenoise>=6.5
+gunicorn>=20.1
+psycopg2-binary>=2.9
+python-decouple>=3.8

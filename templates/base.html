@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Stock Insight Platform{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-blue-700 p-4 text-white flex justify-between items-center shadow">
+        <a href="/" class="font-bold text-2xl tracking-tight">Stock Insight</a>
+        <div class="flex items-center gap-4">
+            {% if user.is_authenticated %}
+                <span class="mr-2">Hello, <span class="font-semibold">{{ user.username }}</span></span>
+                <a href="/logout/" class="bg-blue-900 px-4 py-1 rounded hover:bg-blue-800 transition">Logout</a>
+            {% else %}
+                <a href="/login/" class="hover:underline">Login</a>
+                <a href="/register/" class="hover:underline">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+    <main class="flex flex-col items-center justify-center w-full py-8 px-2">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html> 

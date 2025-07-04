@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+{% if not request.user.userprofile.is_pro %}
+<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
+    Free tier: 5 predictions/day. <a href="/subscribe/" class="underline text-blue-700 font-semibold">Upgrade to Pro</a> for unlimited predictions!
+</div>
+{% endif %}
+<div class="flex flex-col items-center min-h-screen bg-gray-100">
+    <div class="w-full max-w-3xl bg-white p-8 rounded shadow mt-10">
+        <h2 class="text-4xl font-bold mb-8 text-center text-blue-700">Stock Prediction Dashboard</h2>
+        <form id="predict-form" class="mb-8 flex flex-col md:flex-row items-center gap-4 justify-center">
+            <input type="text" id="ticker" name="ticker" placeholder="Enter Ticker (e.g. TSLA)" class="flex-1 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">Predict</button>
+        </form>
+        <div id="prediction-result" class="mb-8 hidden">
+            <h3 class="text-2xl font-semibold mb-4 text-green-700">Prediction Result</h3>
+            <p class="mb-2"><strong>Next Day Price:</strong> <span id="next-day-price" class="text-blue-800 font-bold"></span></p>
+            <p class="mb-4"><strong>MSE:</strong> <span id="mse"></span> | <strong>RMSE:</strong> <span id="rmse"></span> | <strong>R²:</strong> <span id="r2"></span></p>
+            <div class="flex flex-col md:flex-row gap-6 justify-center">
+                <img id="plot-history" class="w-full md:w-1/2 rounded border shadow" src="" alt="History Plot">
+                <img id="plot-prediction" class="w-full md:w-1/2 rounded border shadow" src="" alt="Prediction Plot">
+            </div>
+        </div>
+        <h3 class="text-2xl font-semibold mb-4 mt-10 text-blue-700">Past Predictions</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border rounded-lg overflow-hidden shadow">
+                <thead class="bg-blue-100">
+                    <tr>
+                        <th class="border px-4 py-2">Ticker</th>
+                        <th class="border px-4 py-2">Date</th>
+                        <th class="border px-4 py-2">Next Day Price</th>
+                        <th class="border px-4 py-2">MSE</th>
+                        <th class="border px-4 py-2">RMSE</th>
+                        <th class="border px-4 py-2">R²</th>
+                    </tr>
+                </thead>
+                <tbody id="predictions-table">
+                    {% for p in predictions %}
+                    <tr class="hover:bg-gray-100">
+                        <td class="border px-4 py-2">{{ p.ticker }}</td>
+                        <td class="border px-4 py-2">{{ p.created|date:"Y-m-d H:i" }}</td>
+                        <td class="border px-4 py-2">{{ p.next_day_price }}</td>
+                        <td class="border px-4 py-2">{{ p.metrics.mse }}</td>
+                        <td class="border px-4 py-2">{{ p.metrics.rmse }}</td>
+                        <td class="border px-4 py-2">{{ p.metrics.r2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center py-4">No predictions yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if paginator.num_pages > 1 %}
+        <div class="flex justify-center mt-6 space-x-2">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">&laquo; Prev</a>
+            {% endif %}
+            {% for num in paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="px-4 py-2 bg-blue-600 text-white rounded">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?page={{ num }}" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Next &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+<script>
+console.log('Dashboard JS loaded'); // Debug: script loaded
+
+document.getElementById('predict-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    console.log('Predict form submitted'); // Debug: form submit event triggered
+    const ticker = document.getElementById('ticker').value;
+    const token = localStorage.getItem('jwt');
+    console.log('JWT token:', token); // Debug: print the token being sent
+    if (!token) {
+        alert('You are not authenticated. Please log in again.');
+        window.location.href = '/login/';
+        return;
+    }
+    const res = await fetch('/api/v1/predict/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ ticker })
+    });
+    if (res.ok) {
+        const data = await res.json();
+        document.getElementById('prediction-result').classList.remove('hidden');
+        document.getElementById('next-day-price').textContent = data.next_day_price || '';
+        document.getElementById('mse').textContent = data.metrics?.mse || '';
+        document.getElementById('rmse').textContent = data.metrics?.rmse || '';
+        document.getElementById('r2').textContent = data.metrics?.r2 || '';
+        if (data.plot_urls && data.plot_urls.length > 0) {
+            document.getElementById('plot-history').src = data.plot_urls[0];
+            document.getElementById('plot-prediction').src = data.plot_urls[1] || '';
+        }
+        // Optionally, reload the page or update the table with the new prediction
+        // location.reload();
+    } else {
+        alert('Prediction failed.');
+    }
+});
+</script>
+{% endblock %} 
