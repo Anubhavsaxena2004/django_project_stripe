@@ -3,7 +3,7 @@
 {% block content %}
 {% if not request.user.userprofile.is_pro %}
 <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
-    Free tier: 20 predictions/day. <a href="/subscribe/" class="underline text-blue-700 font-semibold">Upgrade to Pro</a> for unlimited predictions!
+    Free tier: 5 predictions/day. <a href="/subscribe/" class="underline text-blue-700 font-semibold">Upgrade to Pro</a> for unlimited predictions!
 </div>
 {% endif %}
 <div class="flex flex-col items-center min-h-screen bg-gray-100">
@@ -100,22 +100,8 @@ document.getElementById('predict-form').addEventListener('submit', async functio
         document.getElementById('rmse').textContent = data.metrics?.rmse || '';
         document.getElementById('r2').textContent = data.metrics?.r2 || '';
         if (data.plot_urls && data.plot_urls.length > 0) {
-            const historyImg = document.getElementById('plot-history');
-            const predictionImg = document.getElementById('plot-prediction');
-            
-            historyImg.src = data.plot_urls[0];
-            historyImg.onerror = function() {
-                console.error('Failed to load history plot:', data.plot_urls[0]);
-                this.style.display = 'none';
-            };
-            
-            if (data.plot_urls[1]) {
-                predictionImg.src = data.plot_urls[1];
-                predictionImg.onerror = function() {
-                    console.error('Failed to load prediction plot:', data.plot_urls[1]);
-                    this.style.display = 'none';
-                };
-            }
+            document.getElementById('plot-history').src = data.plot_urls[0];
+            document.getElementById('plot-prediction').src = data.plot_urls[1] || '';
         }
         // Optionally, reload the page or update the table with the new prediction
         // location.reload();

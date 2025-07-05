@@ -22,11 +22,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 def healthz(request):
-    return JsonResponse({
-        "status": "ok",
-        "timestamp": "2024-01-01T00:00:00Z",
-        "service": "stock_prediction_main"
-    })
+    return JsonResponse({"status": "ok"})
 
 urlpatterns = [
    
@@ -41,12 +37,4 @@ urlpatterns = [
     # Healthcheck endpoint to be implemented
 ]
 
-# Serve media files in development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-else:
-    # In production, serve media files through Django
-    from django.views.static import serve
-    urlpatterns += [
-        path('media/<path:path>', serve, {'document_root': settings.MEDIA_ROOT}),
-    ]
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
