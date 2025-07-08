@@ -26,12 +26,13 @@ import stripe
 from django.core.paginator import Paginator
 from .models import UserProfile
 from django.views import View
+from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 
 stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
 STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
-STRIPE_PRICE_ID = os.environ.get('STRIPE_PRICE_ID', 'price_1Nxxxxxx')  # Replace with your test price ID
+STRIPE_PRICE_ID = os.environ.get('STRIPE_PRICE_ID', 'price_1Rh3TA2cJFqwZzBWPfWDek9s')  # Replace with your test price ID
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -122,6 +123,9 @@ class PredictionCreateView(generics.CreateAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'error': str(e)}, status=500)
+        
+        def api_predict(self, request, *args, **kwargs):
+            return self.create(request, *args, **kwargs)
 
 class PredictionListView(generics.ListAPIView):
     serializer_class = PredictionSerializer
@@ -245,3 +249,12 @@ def stripe_webhook(request):
         except Exception:
             pass
     return HttpResponse(status=200)
+
+class predictionCreateView1(generics.CreateAPIView):
+    serializer_class = PredictionSerializer
+    permission_classes = [permissions.AllowAny]
+    def get(self, request):
+        predictions = Prediction.objects.all().order_by('-created')[:5]
+        return JsonResponse({
+            'predictions': PredictionSerializer(predictions, many=True).data
+        }, status=200)

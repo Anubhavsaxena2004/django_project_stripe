@@ -123,3 +123,5 @@ docker run -p 8000:8000 --env-file .env stock-prediction
 
 ## License
 This project is for educational purposes. See `LICENSE` for details. 
+
+gunicorn stock_prediction_main.wsgi:application --bind 0.0.0.0:8000 --workers 3

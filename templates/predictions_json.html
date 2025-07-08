@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">Last 5 Predictions (JSON)</h2>
+<pre id="json-output">Loading...</pre>
+<script>
+  fetch('/api/v1/predictions/')
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('json-output').textContent = JSON.stringify(data, null, 2);
+    })
+    .catch(error => {
+      document.getElementById('json-output').textContent = "Error: " + error;
+    });
+</script>
+{% endblock %} 

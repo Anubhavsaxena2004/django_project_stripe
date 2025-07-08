@@ -11,5 +11,5 @@ class QuotaMiddleware(MiddlewareMixin):
                 today = timezone.now().date()
                 count = Prediction.objects.filter(user=request.user, created__date=today).count()
                 if count >= 5:
-                    return JsonResponse({'error': 'Free tier: 5 predictions/day limit reached. Upgrade to Pro for unlimited predictions.'}, status=429)
+                    return JsonResponse({'error': 'You have hit the 5 predictions,Subscribe for doing more predictions'}, status=429)
         return None 
